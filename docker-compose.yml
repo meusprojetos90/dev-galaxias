@@ -1,0 +1,39 @@
+version: '3.8'
+
+services:
+  # PostgreSQL - Banco de dados principal
+  db:
+    image: postgres:17-alpine
+    container_name: dev_galaxias_db
+    environment:
+      POSTGRES_USER: dev_galaxias
+      POSTGRES_PASSWORD: secretpassword
+      POSTGRES_DB: dev_galaxias
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U dev_galaxias"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  # Valkey (Redis fork) - Cache, Sessões, Leaderboard e Mensageria básica
+  cache:
+    image: valkey/valkey:8-alpine
+    container_name: dev_galaxias_cache
+    ports:
+      - "6379:6379"
+    volumes:
+      - cachedata:/data
+    command: valkey-server --appendonly yes
+    healthcheck:
+      test: ["CMD", "valkey-cli", "ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  pgdata:
+  cachedata:
