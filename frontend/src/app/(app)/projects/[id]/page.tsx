@@ -2,7 +2,7 @@
 
 import { Terminal, Code2, Play, Sparkles, Send, ChevronRight, FileCode2, LayoutTemplate } from 'lucide-react';
 import Link from 'next/link';
-import { useState } from 'react';
+import { useState, use } from 'react';
 
 // Mock data for the current project
 const projectDetail = {
@@ -50,7 +50,8 @@ const mockTerminal = `dev@galaxias:~/workspace/api-gateway$ go run main.go
 > GET /api/v1/products (429 Too Many Requests) - 2ms
 `;
 
-export default function ProjectWorkspacePage({ params }: { params: { id: string } }) {
+export default function ProjectWorkspacePage({ params }: { params: Promise<{ id: string }> }) {
+  const { id } = use(params);
   const [activeTab, setActiveTab] = useState('main.go');
   const [isRunning, setIsRunning] = useState(false);
 

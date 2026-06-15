@@ -2,7 +2,7 @@
 
 import { Play, PlayCircle, Code2, CheckCircle2, Lock, ChevronLeft, Download, MessageSquare, ChevronRight } from 'lucide-react';
 import Link from 'next/link';
-import { useState } from 'react';
+import { useState, use } from 'react';
 
 // Mock data for the current lesson
 const currentLesson = {
@@ -26,14 +26,15 @@ const currentModule = {
   ]
 };
 
-export default function LessonPlayerPage({ params }: { params: { slug: string, lessonId: string } }) {
+export default function LessonPlayerPage({ params }: { params: Promise<{ slug: string, lessonId: string }> }) {
+  const { slug, lessonId } = use(params);
   const [activeTab, setActiveTab] = useState('overview');
 
   return (
     <div className="lesson-player-page">
       <div className="breadcrumb">
         <Link href="/tracks">Trilhas</Link> <ChevronRight size={14} /> 
-        <Link href={`/tracks/${params.slug}`}>Fundamentos</Link> <ChevronRight size={14} /> 
+        <Link href={`/tracks/${slug}`}>Fundamentos</Link> <ChevronRight size={14} /> 
         <span>{currentLesson.title}</span>
       </div>
 
@@ -110,13 +111,13 @@ export default function LessonPlayerPage({ params }: { params: { slug: string, l
 
         {/* Sidebar (Lesson List) */}
         <aside className="lesson-sidebar">
-          <div className="card !p-0 overflow-hidden flex flex-col h-full">
-            <div className="p-4 border-b border-[var(--glass-border)] bg-[rgba(255,255,255,0.02)]">
-              <span className="text-xs font-bold text-[var(--accent-indigo)] uppercase tracking-wider mb-1 block">Módulo Atual</span>
-              <h3 className="font-bold text-[var(--text-primary)] leading-tight">{currentModule.title}</h3>
+          <div className="card lesson-sidebar-card">
+            <div className="lesson-sidebar-header">
+              <span className="lesson-sidebar-label">Módulo Atual</span>
+              <h3 className="lesson-sidebar-title">{currentModule.title}</h3>
             </div>
             
-            <div className="flex-1 overflow-y-auto">
+            <div className="lesson-sidebar-list">
               {currentModule.lessons.map((lesson) => {
                 const isActive = lesson.id === currentLesson.id;
                 const isLocked = lesson.status === 'locked';
@@ -124,22 +125,18 @@ export default function LessonPlayerPage({ params }: { params: { slug: string, l
                 return (
                   <div 
                     key={lesson.id} 
-                    className={`
-                      flex items-center gap-3 p-4 border-b border-[rgba(255,255,255,0.05)] transition-colors
-                      ${isActive ? 'bg-[rgba(139,92,246,0.1)] border-l-4 border-l-[var(--accent-indigo)]' : 'border-l-4 border-l-transparent'}
-                      ${isLocked ? 'opacity-50' : 'cursor-pointer hover:bg-[rgba(255,255,255,0.02)]'}
-                    `}
+                    className={`lesson-sidebar-item ${isActive ? 'active' : ''} ${isLocked ? 'locked' : ''}`}
                   >
-                    <div className="shrink-0 text-[var(--text-tertiary)]">
+                    <div className="lesson-sidebar-item-icon">
                       {lesson.status === 'completed' && <CheckCircle2 size={16} className="text-[var(--accent-green)]" />}
                       {lesson.status === 'in_progress' && (lesson.type === 'video' ? <PlayCircle size={16} className={isActive ? 'text-[var(--accent-indigo)]' : ''} /> : <Code2 size={16} />)}
                       {lesson.status === 'locked' && <Lock size={16} />}
                     </div>
-                    <div className="flex flex-col min-w-0">
-                      <span className={`text-sm font-medium truncate ${isActive ? 'text-[var(--accent-indigo)]' : 'text-[var(--text-primary)]'}`}>
+                    <div className="lesson-sidebar-item-content">
+                      <span className="lesson-sidebar-item-title">
                         {lesson.title}
                       </span>
-                      <span className="text-xs text-[var(--text-tertiary)] mt-0.5">{lesson.duration}</span>
+                      <span className="lesson-sidebar-item-duration">{lesson.duration}</span>
                     </div>
                   </div>
                 );

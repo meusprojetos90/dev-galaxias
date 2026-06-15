@@ -3,6 +3,8 @@
 import { PlayCircle, Lock, CheckCircle2, ChevronRight, BookOpen, Code2 } from 'lucide-react';
 import Link from 'next/link';
 
+import { use } from 'react';
+
 // Mock data
 const trackDetail = {
   id: 'fundamentos',
@@ -44,7 +46,9 @@ const trackDetail = {
   ]
 };
 
-export default function TrackDetailPage({ params }: { params: { slug: string } }) {
+export default function TrackDetailPage({ params }: { params: Promise<{ slug: string }> }) {
+  const { slug } = use(params);
+
   return (
     <div className="track-detail-page">
       <div className="breadcrumb">
@@ -86,7 +90,7 @@ export default function TrackDetailPage({ params }: { params: { slug: string } }
               {mod.lessons.map(lesson => {
                 const isLocked = lesson.status === 'locked';
                 const Wrapper = isLocked ? 'div' : Link;
-                const wrapperProps = isLocked ? {} : { href: `/tracks/${params.slug}/lessons/${lesson.id}` };
+                const wrapperProps = isLocked ? {} : { href: `/tracks/${slug}/lessons/${lesson.id}` };
 
                 return (
                   <Wrapper key={lesson.id} className={`lesson-item ${lesson.status}`} {...wrapperProps}>
